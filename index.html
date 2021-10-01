@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Two Sine Saves</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.js"></script>
+  </head>
+
+  <body>
+    <style>
+      .inputs {
+        margin: 10px auto;
+      }
+
+      .hidden {
+        display: none;
+      }
+      .yellow {
+        background: yellow;
+      }
+    </style>
+    <div id="app">
+      <div class="inputs">
+        <label for="freq1">freq1</label>
+        <input id="freq1" name="freq1" />
+        <label for="freq2">freq2</label>
+        <input id="freq2" name="freq2" />
+      </div>
+
+      <button id="start" class="hidden">play these frequencies</button>
+    </div>
+
+    <script>
+      let freq1 = 0;
+      let freq2 = 0;
+
+      const app = document.querySelector("#app");
+      const startButton = document.getElementById("start");
+
+      const merge = new Tone.Merge().toDestination();
+      const synth1 = new Tone.Oscillator(freq1, "sine1")
+        .connect(merge, 0, 0)
+        .start();
+      const synth2 = new Tone.Oscillator(freq2, "sine1")
+        .connect(merge, 0, 0)
+        .start();
+
+      synth1.volume.value = -10;
+      synth2.volume.value = -10;
+
+      const signal1 = new Tone.Signal({
+        value: freq1,
+        units: "frequency",
+      }).connect(synth1.frequency);
+
+      const signal2 = new Tone.Signal({
+        value: freq2,
+        units: "frequency",
+      }).connect(synth2.frequency);
+
+      document.addEventListener("click", () => {
+        Tone.start();
+      });
+
+      const input1 = document.querySelector("#freq1");
+      const input2 = document.querySelector("#freq2");
+
+      input1.addEventListener("input", (e) => {
+        signal1.rampTo(e.target.value, 1);
+      });
+
+      input2.addEventListener("input", (e) => {
+        signal2.rampTo(e.target.value, 1);
+      });
+
+      startButton.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        startButton.classList.add("hidden");
+      });
+    </script>
+  </body>
+</html>
