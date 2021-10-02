@@ -38,6 +38,13 @@ const getFollowersFollowing = async () => {
     }
 }
 
+fastify.get('/', (request, reply) => {
+    reply.header('Access-Control-Allow-Origin', '*')
+    reply.header('Access-Control-Allow-Methods', 'GET')
+
+    return { data: 'hi' }
+})
+
 fastify.get('/followers', async (request, reply) => {
     reply.header('Access-Control-Allow-Origin', '*')
     reply.header('Access-Control-Allow-Methods', 'GET')
