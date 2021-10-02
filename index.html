@@ -1,88 +1,68 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Two Sine Saves</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1"
-    />
+    <head>
+        <meta charset="utf-8" />
+        <title>Two Sine Saves</title>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1"
+        />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.js"></script>
-  </head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.26/Tone.js"></script>
+    </head>
 
-  <body>
-    <style>
-      .inputs {
-        margin: 10px auto;
-      }
+    <body>
+        <div>
+            <p>Matt Sargent's current Twitter following/follower ratio</p>
+            <span id="following"></span><span>:</span
+            ><span id="followers"></span>
+            <p>click anywhere to listen</p>
+        </div>
 
-      .hidden {
-        display: none;
-      }
-      .yellow {
-        background: yellow;
-      }
-    </style>
-    <div id="app">
-      <div class="inputs">
-        <label for="freq1">freq1</label>
-        <input id="freq1" name="freq1" />
-        <label for="freq2">freq2</label>
-        <input id="freq2" name="freq2" />
-      </div>
+        <script>
+            let followingFreq = 0
+            let followersFreq = 0
 
-      <button id="start" class="hidden">play these frequencies</button>
-    </div>
+            const merge = new Tone.Merge().toDestination()
+            const followingSynth = new Tone.Oscillator(followingFreq, 'sine1')
+                .connect(merge, 0, 0)
+                .start()
+            const followersSynth = new Tone.Oscillator(followersFreq, 'sine1')
+                .connect(merge, 0, 0)
+                .start()
 
-    <script>
-      let freq1 = 0;
-      let freq2 = 0;
+            followingSynth.volume.value = -10
+            followersSynth.volume.value = -10
 
-      const app = document.querySelector("#app");
-      const startButton = document.getElementById("start");
+            const followingSignal = new Tone.Signal({
+                value: followingFreq,
+                units: 'frequency',
+            }).connect(followingSynth.frequency)
 
-      const merge = new Tone.Merge().toDestination();
-      const synth1 = new Tone.Oscillator(freq1, "sine1")
-        .connect(merge, 0, 0)
-        .start();
-      const synth2 = new Tone.Oscillator(freq2, "sine1")
-        .connect(merge, 0, 0)
-        .start();
+            const followersSignal = new Tone.Signal({
+                value: followersFreq,
+                units: 'frequency',
+            }).connect(followersSynth.frequency)
 
-      synth1.volume.value = -10;
-      synth2.volume.value = -10;
+            const followersSpan = document.querySelector('#followers')
+            console.log({ followersSpan })
+            const followingSpan = document.querySelector('#following')
 
-      const signal1 = new Tone.Signal({
-        value: freq1,
-        units: "frequency",
-      }).connect(synth1.frequency);
-
-      const signal2 = new Tone.Signal({
-        value: freq2,
-        units: "frequency",
-      }).connect(synth2.frequency);
-
-      document.addEventListener("click", () => {
-        Tone.start();
-      });
-
-      const input1 = document.querySelector("#freq1");
-      const input2 = document.querySelector("#freq2");
-
-      input1.addEventListener("input", (e) => {
-        signal1.rampTo(e.target.value, 1);
-      });
-
-      input2.addEventListener("input", (e) => {
-        signal2.rampTo(e.target.value, 1);
-      });
-
-      startButton.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        startButton.classList.add("hidden");
-      });
-    </script>
-  </body>
+            document.addEventListener('click', () => {
+                Tone.start()
+                followingSignal.rampTo(followingFreq, 0)
+                followersSignal.rampTo(followersFreq, 0)
+            })
+            window.onload = async () => {
+                fetch('http://localhost:3000/followers')
+                    .then((response) => response.json())
+                    .then(({ followers, following }) => {
+                        followingFreq = following
+                        followersFreq = followers
+                        followersSpan.textContent = followers
+                        followingSpan.innerText = following
+                    })
+            }
+        </script>
+    </body>
 </html>
