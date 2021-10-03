@@ -1,65 +1,42 @@
-require('dotenv').config()
-const fastify = require('fastify')({ logger: true })
-const needle = require('needle')
+import fastify from 'fastify';
+import { getUserFollowersById } from './controllers/getUserFollowersById.js';
+import { getUserFollowersByUsername } from './controllers/getUserFollowersByUsername.js';
 
-// this is the ID for @mttsrgnt
-const userId = 380051971
-const url = `https://api.twitter.com/2/users/${userId}`
-const bearerToken = process.env.TWITTER_API_BEARER_TOKEN
+const server = fastify();
 
-const getFollowersFollowing = async () => {
-    let params = {
-        'user.fields': 'public_metrics',
-    }
+server.get('/followers/:userId', async (request, reply) => {
+  const { userId } = request.params;
+  reply.header('Access-Control-Allow-Origin', '*');
+  reply.header('Access-Control-Allow-Methods', 'GET');
 
-    const options = {
-        headers: {
-            'User-Agent': 'v2FollowersJS',
-            authorization: `Bearer ${bearerToken}`,
-        },
-    }
+  const { followers, following } = await getUserFollowersById(userId);
+  return { followers, following };
+});
 
-    try {
-        const resp = await needle('get', url, params, options)
+server.get('/followers/by/username/:username', async (request, reply) => {
+  const { username } = request.params;
+  reply.header('Access-Control-Allow-Origin', '*');
+  reply.header('Access-Control-Allow-Methods', 'GET');
 
-        if (resp.statusCode != 200) {
-            console.log(
-                `${resp.statusCode} ${resp.statusMessage}:\n${resp.body}`
-            )
-            return
-        }
+  const { followers, following } = await getUserFollowersByUsername(username);
+  return { followers, following };
+});
 
-        const { data } = resp.body
-        const { followers_count: followers, following_count: following } =
-            data.public_metrics
-        return { followers, following }
-    } catch (err) {
-        throw new Error(`Request failed: ${err}`)
-    }
-}
+server.get('/', (request, reply) => {
+  reply.header('Access-Control-Allow-Origin', '*');
+  reply.header('Access-Control-Allow-Methods', 'GET');
 
-fastify.get('/', (request, reply) => {
-    reply.header('Access-Control-Allow-Origin', '*')
-    reply.header('Access-Control-Allow-Methods', 'GET')
-
-    return { data: 'hi' }
-})
-
-fastify.get('/followers', async (request, reply) => {
-    reply.header('Access-Control-Allow-Origin', '*')
-    reply.header('Access-Control-Allow-Methods', 'GET')
-
-    const { followers, following } = await getFollowersFollowing()
-    return { followers, following }
-})
+  return { data: 'hi' };
+});
 
 // Run the server!
 const start = async () => {
-    try {
-        await fastify.listen(process.env.PORT || 3000, '0.0.0.0')
-    } catch (err) {
-        fastify.log.error(err)
-        process.exit(1)
-    }
-}
-start()
+  try {
+    await server.listen(process.env.PORT || 3000, '0.0.0.0');
+    console.log('server running');
+  } catch (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
+};
+start();
