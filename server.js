@@ -4,7 +4,7 @@ import { getUserFollowersByUsername } from './controllers/getUserFollowersByUser
 
 const server = fastify();
 
-server.get('/followers/:userId', async (request, reply) => {
+server.get('/followers/by/id/:userId', async (request, reply) => {
   const { userId } = request.params;
   reply.header('Access-Control-Allow-Origin', '*');
   reply.header('Access-Control-Allow-Methods', 'GET');
