@@ -18,15 +18,17 @@ server.get('/followers/by/username/:username', async (request, reply) => {
   reply.header('Access-Control-Allow-Origin', '*');
   reply.header('Access-Control-Allow-Methods', 'GET');
 
-  const { followers, following } = await getUserFollowersByUsername(username);
-  return { followers, following };
+  const { name, handle, followers, following } =
+    await getUserFollowersByUsername(username);
+
+  return { name, handle, followers, following };
 });
 
 server.get('/', (request, reply) => {
   reply.header('Access-Control-Allow-Origin', '*');
   reply.header('Access-Control-Allow-Methods', 'GET');
 
-  return { data: 'hi' };
+  return { message: 'hi' };
 });
 
 // Run the server!

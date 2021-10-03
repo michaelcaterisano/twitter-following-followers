@@ -22,10 +22,12 @@ export async function getUserFollowersByUsername(username) {
 
     const { data } = resp.body;
 
+    const { name, username: handle } = data;
+
     const { followers_count: followers, following_count: following } =
       data.public_metrics;
 
-    return { followers, following };
+    return { name, handle, followers, following };
   } catch (err) {
     throw new Error(`Request failed: ${err}`);
   }
